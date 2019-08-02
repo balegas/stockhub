@@ -35,34 +35,34 @@ const stockRep: StockRepository = new StockRepository(new StocksAlphaVantage());
 //https://medium.com/@awesome1888/how-to-use-graphql-apollo-server-with-serverless-606430ad94b3
 
 const resolvers = {
-        Query: {
-            ticker: (obj, {symbol}, context, info): Ticker => fetchTicker(symbol)
-        },
+    Query: {
+        ticker: (obj, {symbol}, context, info): Ticker => fetchTicker(symbol)
+    },
 
-        Ticker: {},
+    Ticker: {},
 
-        Date: new GraphQLScalarType({
-            name: 'Date',
-            description: 'Date custom scalar type',
-            parseValue(value: any): ?Date {
-                if (typeof value === String) {
-                    return new Date(value); // value from the client
-                }
-            },
-            serialize(value: any): ?string {
-                if (typeof value === Date) {
-                    return value.getTime();
-                }
-            },
-            parseLiteral(ast: any): ?number {
-                if (ast.kind === Kind.INT) {
-                    return parseInt(ast.value, 10); // ast value is always in string format
-                }
-                return null;
+    Date: new GraphQLScalarType({
+        name: 'Date',
+        description: 'Date custom scalar type',
+        parseValue(value: any): ?Date {
+            if (typeof value === String) {
+                return new Date(value); // value from the client
             }
-            ,
-        }),
-    };
+        },
+        serialize(value: any): ?string {
+            if (typeof value === Date) {
+                return value.getTime();
+            }
+        },
+        parseLiteral(ast: any): ?number {
+            if (ast.kind === Kind.INT) {
+                return parseInt(ast.value, 10); // ast value is always in string format
+            }
+            return null;
+        }
+        ,
+    }),
+};
 
 const server = new ApolloServer({typeDefs, resolvers});
 
@@ -71,7 +71,7 @@ const fetchTicker = (symbol): Ticker => stockRep.ticker(symbol);
 
 server.applyMiddleware({app});
 
-app.listen({port: 4000}, () =>
+app.listen({port: 4000}, (): any =>
     console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`)
 );
 
