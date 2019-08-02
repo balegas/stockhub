@@ -1,0 +1,49 @@
+{
+  "name": "stockhub",
+  "version": "1.0.0",
+  "description": "An API for querying stocks",
+  "main": "app.js",
+  "dependencies": {
+    "@babel/preset-env": "^7.5.5",
+    "alphavantage": "^1.2.5",
+    "apollo-server-express": "^2.8.1",
+    "babel-eslint": "^10.0.2",
+    "express": "^4.17.1",
+    "flow-bin": "^0.104.0",
+    "graphql": "^14.4.2",
+    "jsconfig": "^0.2.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.5.5",
+    "@babel/core": "^7.5.5",
+    "@babel/node": "^7.5.5",
+    "@babel/preset-flow": "^7.0.0",
+    "eslint": "^6.1.0",
+    "eslint-plugin-flowtype": "^3.12.2",
+    "nodemon": "^1.19.1"
+  },
+  "scripts": {
+    "test": "jest",
+    "build": "babel src/ -d lib/",
+    "prepublish": "yarn run build",
+    "flow": "flow"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/balegas/stockhub.git"
+  },
+  "keywords": [
+    "Stocks",
+    "GraphQL",
+    "Realtime",
+    "Service",
+    "API",
+    "REST"
+  ],
+  "author": "Valter Balegas",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/balegas/stockhub/issues"
+  },
+  "homepage": "https://github.com/balegas/stockhub#readme"
+}
