@@ -1,4 +1,4 @@
-//@flow
+// @flow
 import {StockAPI} from "../Interfaces/StockAPI";
 import Ticker from "../Models/Ticker";
 import config from "alphavantage";
@@ -11,7 +11,7 @@ export default class StocksAlphaVantage implements StockAPI {
         this.alpha = config({key: process.env.API_KEY});
     }
 
-    ticker(symbol: string): Ticker {
+    ticker(symbol: string): Promise<Ticker> {
         return this.alpha.data.quote(symbol)
             .then((data): any => {console.log("data", data); return Ticker})
             .then((data): Ticker => this.createTicker(data))

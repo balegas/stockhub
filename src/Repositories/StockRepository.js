@@ -11,10 +11,7 @@ export default class StockRepository {
         this.api = api;
     }
 
-    ticker(symbol: string): Ticker {
+    ticker(symbol: string): Promise<Ticker> {
         return this.api.ticker(symbol);
     }
-
 }
-
-
