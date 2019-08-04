@@ -1,4 +1,4 @@
-//@flow
+// @flow
 export default class Ticker {
 
     symbol: string;
@@ -16,4 +16,5 @@ export default class Ticker {
         this.start = props.start;
         this.end = props.end;
     }
+
 }

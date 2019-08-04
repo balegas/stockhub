@@ -15,13 +15,14 @@ const typeDefs = gql`
 
     type Ticker {
         symbol : String!
+        open: Float,
         high: Float,
         low: Float,
         current: Float,
         start: Date,
         end: Date,
     }
-
+    
     type Query {
         hello: String,
         ticker( symbol: String!) : Ticker

@@ -5,33 +5,39 @@ import config from "alphavantage";
 
 export default class StocksAlphaVantage implements StockAPI {
 
+    key: string;
     alpha: Object;
 
-    constructor(props: Object) {
-        this.alpha = config({key: process.env.API_KEY});
+    constructor(props: Object = {}) {
+        this.key = props.API_KEY || process.env.API_KEY || '';
+        this.alpha = config({key: this.key});
     }
 
     ticker(symbol: string): Promise<Ticker> {
-        return this.alpha.data.quote(symbol)
-            .then((data): any => {console.log("data", data); return Ticker})
+        return this.fetchTickerObj(symbol)
             .then((data): Ticker => this.createTicker(data))
+
     }
 
     createTicker(data: { symbol: string }): Ticker {
-        const {symbol} = data;
-        return new Ticker({symbol});
+        let jsonTicker = this.parse(data);
+        return new Ticker(jsonTicker);
+    }
+
+    fetchTickerObj(symbol: string): Promise<Object> {
+        return this.alpha.data.quote(symbol)
+    }
+
+    parse(jsonTicker: Object): Object {
+        const baseKey = 'Global Quote';
+        const reg = /\d*\.\s(\w*)/;
+        let res = {};
+        Object.keys(jsonTicker[baseKey]).forEach(k => {
+            let m: ?Array<any> = reg.exec(k);
+            if (m && m[1]) {
+                res[m[1]] = jsonTicker[baseKey][k]
+            }
+        });
+        return res;
     }
 }
-
-
-// mock { 'Global Quote':
-//    { '01. symbol': 'BYND',
-//      '02. open': '177.6000',
-//      '03. high': '181.9100',
-//      '04. low': '175.2700',
-//      '05. price': '176.7700',
-//      '06. volume': '4115824',
-//      '07. latest trading day': '2019-08-02',
-//      '08. previous close': '176.0400',
-//      '09. change': '0.7300',
-//      '10. change percent': '0.4147%' } }
