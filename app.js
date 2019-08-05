@@ -4,8 +4,9 @@ import express from 'express';
 import {ApolloServer, gql} from 'apollo-server-express';
 import {GraphQLScalarType, Kind} from 'graphql';
 import Ticker from './src/Models/Ticker';
-import StockRepository from "./src/Repositories/StockRepository";
-import StocksAlphaVantage from "./src/APIs/StocksAlphaVantage";
+import TickerAPI from './src/DataSources/TickerAPI';
+
+const {RedisCache} = require('apollo-server-cache-redis');
 
 dotenv.config();
 
@@ -19,10 +20,12 @@ const typeDefs = gql`
         high: Float,
         low: Float,
         current: Float,
-        start: Date,
         end: Date,
+        previous_close: Float 
+        history(start: String!, end: String!) : [Ticker],
+        lastIntraday: [Ticker]
     }
-    
+
     type Query {
         hello: String,
         ticker( symbol: String!) : Ticker
@@ -35,10 +38,14 @@ const typeDefs = gql`
 
 const resolvers = {
     Query: {
-        ticker: (obj, {symbol}, context, info): Promise<Ticker> => fetchTicker(symbol)
+        ticker: (obj, {symbol}, context, info): Promise<Ticker> => {
+            return context.dataSources.tickerAPI.fetchTicker(symbol)
+        }
     },
 
-    Ticker: {},
+    Ticker: {
+        history: ({symbol}, {start, end}, context): Promise<Array<Ticker>> => context.dataSources.tickerAPI.fetchTickerHistory(symbol, start, end)
+    },
 
     Date: new GraphQLScalarType({
         name: 'Date',
@@ -64,10 +71,23 @@ const resolvers = {
 };
 
 const userTickers = ['BYND', 'MA'];
-const stockRep: StockRepository = new StockRepository(new StocksAlphaVantage());
-const server = new ApolloServer({typeDefs, resolvers});
+const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    dataSources: (): Object => {
+        return {
+            tickerAPI: new TickerAPI({
+                cache: new RedisCache({
+                    host: 'localhost'
+                })
+            })
+        };
+    },
+    context: (): Object => {
+        return {};
+    },
+});
 const app = express();
-const fetchTicker = (symbol): Promise<Ticker> => stockRep.ticker(symbol);
 
 server.applyMiddleware({app});
 

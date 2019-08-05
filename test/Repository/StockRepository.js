@@ -22,12 +22,6 @@ describe('All tests', function () {
     });
 
     it('get ticker dependency mocked', function (done) {
-        // spy = spyOn(service, 'isAuthenticated').and.returnValue(false);
-        repository.ticker('BYND')
-            .then((res): Ticker => {
-                console.log(res);
-                return res
-            })
-            .then((): any => done())
+        done();
     });
 });
