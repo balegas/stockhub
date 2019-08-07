@@ -33,11 +33,11 @@ export default class IEX implements StockAPI {
     tickerNews(symbol: string): Promise<Array<News>> {
         return this.fetchTickerNewsObj(symbol)
             .then((data): Array<Object> => data.map((obj): News => this.createNews(obj)))
-            .then((news): Array<News> => {news.sort((a, b): boolean => b.datetime - a.datetime); return news});
+            .then((news): Array<News> => {news.sort((a, b): number => b.datetime - a.datetime); return news});
     }
 
-    tickers(symbols: Array<string>): Array<Ticker> {
-        return Promise.all(symbols.map((s): Ticker => this.ticker(s)));
+    tickers(symbols: Array<string>): Promise<Array<Ticker>> {
+        return Promise.all(symbols.map((s): Promise<Ticker> => this.ticker(s)));
     }
 
     //max 1 month

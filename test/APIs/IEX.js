@@ -27,7 +27,7 @@ describe('All tests', function () {
         sinon.stub(api, "fetchTickerObj").returns(Promise.resolve(testTicker));
         // mock.expects("fetchTickerObj").once().returns(Promise.resolve(testTicker));
         api.ticker(testSymbol)
-            .then((ticker): void => assert.deepStrictEqual(ticker.symbol, testSymbol))
+            .then((ticker): any => assert.deepStrictEqual(ticker.symbol, testSymbol))
             // .then((): any => mock.restore())
             // .then((): any => mock.verify())
             .then((): any => done());
@@ -36,7 +36,7 @@ describe('All tests', function () {
 
     it('ticker history', function (done) {
         api.tickerHistory(testSymbol, '2019-08-05', '2019-08-06')
-            .then((tickers): Array<Ticker> => assert.deepStrictEqual(tickers.length, 2))
+            .then((tickers): any  => assert.deepStrictEqual(tickers.length, 2))
             .then((): any => done())
     });
 
@@ -49,7 +49,7 @@ describe('All tests', function () {
     it('tickers', function (done) {
         sinon.stub(api, "fetchTickerNewsObj").returns(Promise.resolve(testTickerNews));
         api.tickers([testSymbol, testSymbol])
-            .then((tickers): Array<Ticker> => assert.deepStrictEqual(tickers.length, 2))
+            .then((tickers): any => assert.deepStrictEqual(tickers.length, 2))
             .then((): any => done())
     });
 

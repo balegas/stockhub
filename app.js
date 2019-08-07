@@ -4,6 +4,7 @@ import express from 'express';
 import {ApolloServer, gql} from 'apollo-server-express';
 import {GraphQLScalarType, Kind} from 'graphql';
 import Ticker from './src/Models/Ticker';
+import type News from './src/Models/News';
 import RestStocksDatasource from './src/DataSources/RESTStocksDatasource';
 import IEX from './src/APIs/IEX';
 import StockRepository from "./src/Repositories/StockRepository";
@@ -87,19 +88,21 @@ const resolvers = {
                 return new Date(value); // value from the client
             }
             if (typeof value === 'number') {
-                return new Date().setTime(value);
+                const date: Date = new Date();
+                date.setTime(value);
+                return date;
             }
         },
 
-        serialize(value: any): ?string {
+        serialize(value: any): ?number {
             if (typeof value === Date) {
                 return value.getTime();
             }
-            if(typeof value === 'number') {
-                return new Date(value);
+            if (typeof value === 'number') {
+                return new Date(value).getTime();
             }
-            if(typeof value === 'string') {
-                return Date.parse(value).getTime();
+            if (typeof value === 'string') {
+                return Date.parse(value);
             }
         },
 
@@ -128,7 +131,7 @@ const cache = !process.env.DISABLE_CACHE && new RedisCache({
     socket_keepalive: false,
 });
 
-const datasource = new RestStocksDatasource({api, cache});
+const datasource = new RestStocksDatasource({api});
 
 const server = new ApolloServer({
     typeDefs,
