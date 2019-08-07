@@ -8,6 +8,7 @@
     "apollo-datasource": "^0.6.1",
     "apollo-datasource-rest": "^0.6.1",
     "apollo-server-cache-redis": "^1.1.1",
+    "apollo-server-caching": "^0.5.0",
     "apollo-server-express": "^2.8.1",
     "babel-eslint": "^10.0.2",
     "dotenv": "^8.0.0",
@@ -20,6 +21,8 @@
     "istanbul": "^0.4.5",
     "lodash": "^4.17.15",
     "mocha": "^6.2.0",
+    "mongodb": "^3.3.0-beta2",
+    "node-iex-cloud": "0.0.2",
     "nyc": "^14.1.1",
     "sinon": "^7.3.2"
   },

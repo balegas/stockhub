@@ -14,7 +14,7 @@ export default class StocksAlphaVantage implements StockAPI {
     alpha: Object;
 
     constructor(props: Object = {}) {
-        this.key = props.API_KEY || process.env.API_KEY || '';
+        this.key = props.API_KEY || process.env.API_KEY_AV || process.env.API_KEY || '';
         this.alpha = config({key: this.key});
     }
 
@@ -100,21 +100,7 @@ export default class StocksAlphaVantage implements StockAPI {
             }
         });
 
-        const newValues = _.mapValues(newKeys, (v, k): any => {
-            switch (k) {
-                case 'date': {
-                    return new Date(v);
-                }
-                case 'high':
-                case 'low':
-                case 'open':
-                case 'last':
-                    return parseFloat(v);
-                default:
-                    return v;
-            }
-        });
-        return newValues;
+        return Ticker.valueTypeMapper(newKeys);
     }
 
     fetchTickerObj(symbol: string): Promise<Object> {

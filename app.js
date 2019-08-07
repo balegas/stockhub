@@ -4,7 +4,9 @@ import express from 'express';
 import {ApolloServer, gql} from 'apollo-server-express';
 import {GraphQLScalarType, Kind} from 'graphql';
 import Ticker from './src/Models/Ticker';
-import TickerAPI from './src/DataSources/TickerAPI';
+import RestStocksDatasource from './src/DataSources/RESTStocksDatasource';
+import IEX from './src/APIs/IEX';
+import StockRepository from "./src/Repositories/StockRepository";
 
 const {RedisCache} = require('apollo-server-cache-redis');
 
@@ -17,17 +19,27 @@ const typeDefs = gql`
     type Ticker {
         symbol : String!
         open: Float,
+        close: Float,
         high: Float,
         low: Float,
-        current: Float,
-        end: Date,
-        previous_close: Float 
+        latestPrice: Float,
+        previousClose: Float,
+        change: Float,
+        changePercentage: Float,
+        extendedPrice: Float,
+        extendedChange: Float,
+        extendedChangePercent: Float,
+        extendedPriceTime: Float,
+        ytdChange: Float,
+
+        date: Float,
+        percentageAtOpen: Float,
+
         history(start: String!, end: String!) : [Ticker],
-        lastIntraday: [Ticker]
+
     }
 
     type Query {
-        hello: String,
         ticker( symbol: String!) : Ticker
         tickers( symbols: [String]!) : [Ticker]
     }
@@ -39,12 +51,12 @@ const typeDefs = gql`
 const resolvers = {
     Query: {
         ticker: (obj, {symbol}, context, info): Promise<Ticker> => {
-            return context.dataSources.tickerAPI.fetchTicker(symbol)
+            return context.dataSources.stockRepository.ticker(symbol)
         }
     },
 
     Ticker: {
-        history: ({symbol}, {start, end}, context): Promise<Array<Ticker>> => context.dataSources.tickerAPI.fetchTickerHistory(symbol, start, end)
+        history: ({symbol}, {start, end}, context): Promise<Array<Ticker>> => context.dataSources.stockRepository.tickerHistory(symbol, start, end)
     },
 
     Date: new GraphQLScalarType({
@@ -70,22 +82,36 @@ const resolvers = {
     }),
 };
 
-const userTickers = ['BYND', 'MA'];
+const userTickers = ['BYND', 'MA', 'DIS'];
+
+
+const stocksAPI = new IEX({API_KEY: process.env.PROD && process.env.API_KEY_IEX_PROD, sandbox: !process.env.PROD});
+
+process.env.DISABLE_CACHE && console.log("cache disabled");
+
+const cache = !process.env.DISABLE_CACHE && new RedisCache({
+    host: 'localhost',
+    connectTimeout: 5000,
+    retryStrategy: function (times): any {
+        if (times >= 3) {
+            return new Error('Retry attempts exhausted');
+        }
+        var delay = Math.min(times * 50, 2000)
+        return delay
+    },
+    socket_keepalive: false,
+});
+
+const datasource = new RestStocksDatasource({
+    api: stocksAPI,
+    cache
+});
+
 const server = new ApolloServer({
     typeDefs,
     resolvers,
-    dataSources: (): Object => {
-        return {
-            tickerAPI: new TickerAPI({
-                cache: new RedisCache({
-                    host: 'localhost'
-                })
-            })
-        };
-    },
-    context: (): Object => {
-        return {};
-    },
+    dataSources: (): Object => ({stockRepository: new StockRepository({datasource, cache})}),
+    context: (): Object => {}
 });
 const app = express();
 
