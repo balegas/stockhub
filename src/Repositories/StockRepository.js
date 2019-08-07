@@ -17,6 +17,7 @@ export default class StockRepository {
         this.cache = cache;
     }
 
+    //TODO: Cache Get/put abstractions
     ticker(symbol: string): Promise<Ticker> {
         const resolve = (res): Promise<Ticker> => {
             if (res) {
@@ -40,7 +41,15 @@ export default class StockRepository {
         }
     }
 
+    tickers(symbols: Array<string>): Array<Ticker> {
+        return Promise.all(symbols.map((s): Ticker => this.ticker(s)));
+    }
+
+    tickerNews(symbol: string): Array<News> {
+        return this.datasource.fetchTickerNews(symbol);
+    }
+
     tickerHistory(symbol: string, start: (string | Date), end: (string | Date)): Promise<Array<Ticker>> {
-        return this.api.tickerHistory(symbol, start, end);
+        return this.dataSource.fetchTickerHistory(symbol, start, end);
     }
 }

@@ -16,6 +16,18 @@ dotenv.config();
 const typeDefs = gql`
     scalar Date
 
+    type News {
+        headline: String!,
+        datetime: Date,
+        source: String,
+        url: String
+        summary: String,
+        related: String,
+        image: String,
+        lang: String,
+        hasPaywall: Boolean
+    }
+
     type Ticker {
         symbol : String!
         open: Float,
@@ -25,7 +37,7 @@ const typeDefs = gql`
         latestPrice: Float,
         previousClose: Float,
         change: Float,
-        changePercentage: Float,
+        changePercent: Float,
         extendedPrice: Float,
         extendedChange: Float,
         extendedChangePercent: Float,
@@ -36,6 +48,7 @@ const typeDefs = gql`
         percentageAtOpen: Float,
 
         history(start: String!, end: String!) : [Ticker],
+        news: [News]
 
     }
 
@@ -52,25 +65,41 @@ const resolvers = {
     Query: {
         ticker: (obj, {symbol}, context, info): Promise<Ticker> => {
             return context.dataSources.stockRepository.ticker(symbol)
+        },
+
+        tickers: (obj, {symbols}, context, info): Promise<Ticker> => {
+            return context.dataSources.stockRepository.tickers(symbols)
         }
     },
 
     Ticker: {
-        history: ({symbol}, {start, end}, context): Promise<Array<Ticker>> => context.dataSources.stockRepository.tickerHistory(symbol, start, end)
+        history: ({symbol}, {start, end}, context): Promise<Array<Ticker>> => context.dataSources.stockRepository.tickerHistory(symbol, start, end),
+        news: ({symbol}, args, context): Promise<Array<News>> => {
+            return context.dataSources.stockRepository.tickerNews(symbol)
+        }
     },
 
     Date: new GraphQLScalarType({
         name: 'Date',
         description: 'Date custom scalar type',
         parseValue(value: any): ?Date {
-            if (typeof value === String) {
+            if (typeof value === 'string') {
                 return new Date(value); // value from the client
+            }
+            if (typeof value === 'number') {
+                return new Date().setTime(value);
             }
         },
 
         serialize(value: any): ?string {
             if (typeof value === Date) {
                 return value.getTime();
+            }
+            if(typeof value === 'number') {
+                return new Date(value);
+            }
+            if(typeof value === 'string') {
+                return Date.parse(value).getTime();
             }
         },
 
@@ -82,13 +111,10 @@ const resolvers = {
     }),
 };
 
-const userTickers = ['BYND', 'MA', 'DIS'];
-
-
-const stocksAPI = new IEX({API_KEY: process.env.PROD && process.env.API_KEY_IEX_PROD, sandbox: !process.env.PROD});
+process.env.DISABLE_CACHE && console.log("API", "PROD", process.env.PROD, "sandbox", !process.env.PROD);
+const api = new IEX({API_KEY: process.env.PROD && process.env.API_KEY_IEX_PROD, sandbox: !process.env.PROD});
 
 process.env.DISABLE_CACHE && console.log("cache disabled");
-
 const cache = !process.env.DISABLE_CACHE && new RedisCache({
     host: 'localhost',
     connectTimeout: 5000,
@@ -96,22 +122,20 @@ const cache = !process.env.DISABLE_CACHE && new RedisCache({
         if (times >= 3) {
             return new Error('Retry attempts exhausted');
         }
-        var delay = Math.min(times * 50, 2000)
+        var delay = Math.min(times * 50, 2000);
         return delay
     },
     socket_keepalive: false,
 });
 
-const datasource = new RestStocksDatasource({
-    api: stocksAPI,
-    cache
-});
+const datasource = new RestStocksDatasource({api, cache});
 
 const server = new ApolloServer({
     typeDefs,
     resolvers,
     dataSources: (): Object => ({stockRepository: new StockRepository({datasource, cache})}),
-    context: (): Object => {}
+    context: (): Object => {
+    }
 });
 const app = express();
 

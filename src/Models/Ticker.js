@@ -60,20 +60,20 @@ export default class Ticker {
             switch (k) {
                 case 'date':
                     return Ticker.parseDateNotNull(v);
-                case 'open':
-                case 'close':
-                case 'high':
-                case 'low':
-                case 'latestPrice':
-                case 'previousClose':
-                case 'change':
-                case 'changePercent':
-                case 'extendedPrice':
-                case 'extendedChange':
-                case 'extendedChangePercent':
-                case 'extendedPriceTime':
-                case 'ytdChange':
-                    return Ticker.parseFloatNotNull(v);
+                // case 'open':
+                // case 'close':
+                // case 'high':
+                // case 'low':
+                // case 'latestPrice':
+                // case 'previousClose':
+                // case 'change':
+                // case 'changePercent':
+                // case 'extendedPrice':
+                // case 'extendedChange':
+                // case 'extendedChangePercent':
+                // case 'extendedPriceTime':
+                // case 'ytdChange':
+                //     return Ticker.parseFloatNotNull(v);
                 default:
                     return v;
             }
@@ -81,13 +81,13 @@ export default class Ticker {
     }
 
     static parseDateNotNull(date: any): ?Date {
-        if (date && date !== 'null') {
+        if (date) {
             return new Date(date);
         }
     }
 
     static parseFloatNotNull(float: any): ?number {
-        if (float && float !== 'null') {
+        if (float) {
             return parseFloat(float);
         }
     }

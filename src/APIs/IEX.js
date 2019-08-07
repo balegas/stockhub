@@ -5,6 +5,7 @@ import {IEXCloudClient} from "node-iex-cloud";
 import fetch from "node-fetch";
 import Ticker from "../Models/Ticker";
 import _ from "lodash";
+import News from "../Models/News";
 
 
 export default class IEX implements StockAPI {
@@ -27,6 +28,16 @@ export default class IEX implements StockAPI {
                 return ticker;
             })
             .then((data): Ticker => this.createTicker(data))
+    }
+
+    tickerNews(symbol: string): Promise<Array<News>> {
+        return this.fetchTickerNewsObj(symbol)
+            .then((data): Array<Object> => data.map((obj): News => this.createNews(obj)))
+            .then((news): Array<News> => {news.sort((a, b): boolean => b.datetime - a.datetime); return news});
+    }
+
+    tickers(symbols: Array<string>): Array<Ticker> {
+        return Promise.all(symbols.map((s): Ticker => this.ticker(s)));
     }
 
     //max 1 month
@@ -63,6 +74,10 @@ export default class IEX implements StockAPI {
         return this.client.symbol(symbol).quote();
     }
 
+    fetchTickerNewsObj(symbol: string): Promise<Object> {
+        return this.client.symbol(symbol).news(10);
+    }
+
     //arg: 1m, 20190801...
     fetchTickerHistoryObj(symbol: string, {type, arg}: { type: string, arg?: string }): Promise<Object> {
         let query = arg ? type + '/' + arg : type;
@@ -72,14 +87,13 @@ export default class IEX implements StockAPI {
             })
     }
 
-    createTicker(data: { symbol: string }): Ticker {
-        let jsonTicker = this.jsonToTickerJson(data);
+    createTicker(data: Object): Ticker {
+        let jsonTicker = Ticker.valueTypeMapper(data);
         return new Ticker(jsonTicker);
     }
 
-    jsonToTickerJson(json: Object): Object {
-        //TODO: abstract
-        //const newKeys = _.mapKeys(json, (v, k): string => {});
-        return Ticker.valueTypeMapper(json);
+    createNews(data: Object): News {
+        let jsonNews = News.valueTypeMapper(data);
+        return new News(jsonNews);
     }
 }

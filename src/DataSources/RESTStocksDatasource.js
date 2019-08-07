@@ -17,7 +17,10 @@ export default class RESTStocksDatasource extends DataSource {
 
     fetchTicker(symbol: string): Promise<Ticker> {
         return this.api.ticker(symbol)
+    }
 
+    fetchTickerNews(symbol: string): Promise<Ticker> {
+        return this.api.tickerNews(symbol)
     }
 
     fetchTickerHistory(symbol: string, start: (string | Date), end: (string | Date)): Promise<Array<Ticker>> {
