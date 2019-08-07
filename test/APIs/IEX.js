@@ -11,8 +11,10 @@ describe('All tests', function () {
     let symbol: string;
 
     before(() => {
-        console.log(process.env.PROD , process.env.API_KEY_IEX_PROD, process.env.PROD && process.env.API_KEY_IEX_PROD);
-        api = new IEX({API_KEY: process.env.PROD && process.env.API_KEY_IEX_PROD, sandbox: process.env.PROD === undefined});
+        api = new IEX({
+            API_KEY: process.env.PROD && process.env.API_KEY_IEX_PROD,
+            sandbox: process.env.PROD === undefined
+        });
         symbol = 'FTNT';
     });
 
@@ -26,7 +28,6 @@ describe('All tests', function () {
         sinon.stub(api, "fetchTickerObj").returns(Promise.resolve(testTicker));
         // mock.expects("fetchTickerObj").once().returns(Promise.resolve(testTicker));
         api.ticker(anySymbol)
-            .then(res => {console.log(res); return res})
             .then((ticker): void => assert.deepStrictEqual(ticker.symbol, anySymbol))
             // .then((): any => mock.restore())
             // .then((): any => mock.verify())
@@ -34,11 +35,11 @@ describe('All tests', function () {
 
     });
 
-    // it('ticker history', function (done) {
-    //     api.tickerHistory(symbol, '2019-08-01', '2019-08-10')
-    //         .then(res => console.log(res))
-    //         .then((): any => done())
-    // });
+    it('ticker history', function (done) {
+        api.tickerHistory(symbol, '2019-08-05', '2019-08-06')
+            .then((tickers): Array<Ticker> => assert.deepStrictEqual(tickers.length, 2))
+            .then((): any => done())
+    });
 
     // it('ticker intraday', function (done) {
     //     api.tickerLastIntraday(symbol)
