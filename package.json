@@ -9,7 +9,7 @@
     "apollo-datasource-rest": "^0.6.1",
     "apollo-server-cache-redis": "^1.1.1",
     "apollo-server-caching": "^0.5.0",
-    "apollo-server-express": "^2.8.1",
+    "apollo-server-express": "^2.14.2",
     "babel-eslint": "^10.0.2",
     "cheerio": "^1.0.0-rc.3",
     "dotenv": "^8.0.0",
